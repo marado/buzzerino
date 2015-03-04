@@ -58,9 +58,10 @@ const int buzzerPin = 3;
 /* songs */
 
 // TODO: move this into an included file (one song == one file)
-int bpm = 120; // TODO: unused, by now, but that must change
-int bpb = 4; // beats per bar. For instance, a 4/4 signature has bpb = 4, a 2/4 signature has bpb = 2. TODO: use it with bpm to calculate notes length in ms
-int notes[] = {NOTE_C2, NOTE_C2, NOTE_C2};
+
+long bpm = 120L; // beats per minute
+int bpb = 4; // beats per bar. For instance, a 4/4 signature has bpb = 4, a 2/4 signature has bpb = 2
+int notes[] = {NOTE_C4, NOTE_E4, NOTE_G4};
 int tempos[] = {1,2,4}; // TODO: we should be dealing with floats (1/2 notes and so on)
 
 /* end of configuration */
@@ -71,8 +72,16 @@ void setup() {
 
 void loop() {
   // TODO: input validation. At least check sizeof(notes) and sizeof(tempo) are the same.
+
+  // To calculate noteDuration we must know the time of a beat:
+  long rate = 60L*bpb; // seconds in a minute times number of beats in a bar
+  long rateMs = rate*1000L; // rate in ms
+  long barTimeMs = rateMs/bpm; // one bar times rate in ms, divided by bpm
+  long beatTimeMs = barTimeMs/bpb;
+
+  // let's play the song
   for (int thisNote = 0; thisNote < (sizeof(notes) / sizeof(int)); thisNote++) {
-    int noteDuration = 200*tempos[thisNote]; // TODO: un-hardcode
+    long noteDuration = beatTimeMs*tempos[thisNote];
     tone(buzzerPin, notes[thisNote], noteDuration);
 
     int pauseBetweenNotes = noteDuration * 1.30; //TODO: un-hardcode. Also, the pauseBetweenNotes should be a function of bpm, not noteDuration
